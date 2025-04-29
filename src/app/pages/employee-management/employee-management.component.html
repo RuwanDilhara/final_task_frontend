@@ -1,25 +1,27 @@
 <div class="table-container p-6">
-    <div class="table-header flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-semibold">Employee Records</h2>
-      <div class="flex items-center gap-4">
-        <button class="add-btn bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition" 
-                (click)="addNewEmployee()">
-          Add New Employee
+  <div class="table-header flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-semibold">Employee Records</h2>
+    <div class="flex items-center gap-4">
+      <button class="add-btn bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition" 
+              (click)="addNewEmployee()">
+        Add New Employee
+      </button>
+
+      <div class="sort-controls flex items-center gap-2" *ngIf="enableSorting">
+        <label class="text-sm font-medium">Sort by:</label>
+        <select [(ngModel)]="sortField" (change)="sortTable()" class="border rounded px-2 py-1" title="Sort by field">
+          <option value="name">Name</option>
+          <option value="department">Department</option>
+          <option value="createdAt">Created Date</option>
+        </select>
+        <button (click)="toggleSortDirection()" class="text-xl">
+          {{ sortDirection === 'asc' ? '↑' : '↓' }}
         </button>
-  
-        <div class="sort-controls flex items-center gap-2" *ngIf="enableSorting">
-          <label class="text-sm font-medium">Sort by:</label>
-          <select [(ngModel)]="sortField" (change)="sortTable()" class="border rounded px-2 py-1" title="Sort by">
-            <option value="name">Name</option>
-            <option value="department">Department</option>
-          </select>
-          <button (click)="toggleSortDirection()" class="text-xl">
-            {{ sortDirection === 'asc' ? '↑' : '↓' }}
-          </button>
-        </div>
       </div>
     </div>
-  
+  </div>
+
+  <div class="overflow-x-auto">
     <table class="data-table w-full border-collapse border border-gray-300">
       <thead class="bg-gray-100 text-left">
         <tr>
@@ -38,89 +40,91 @@
           <td class="p-2 border">{{ item.name }}</td>
           <td class="p-2 border">{{ item.email }}</td>
           <td class="p-2 border">{{ item.department }}</td>
-          <td class="p-2 border">{{ item.createAt }}</td>
-          <td class="p-2 border">{{ item.updateAt }}</td>
+          <td class="p-2 border">{{ item.createAt | date:'mediumDate' }}</td>
+          <td class="p-2 border">{{ item.updateAt | date:'mediumDate' }}</td>
           <td class="p-2 border flex gap-2">
             <button class="edit-btn bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600" 
                     (click)="openEditModal(item)">
               Edit
             </button>
             <button class="delete-btn bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700" 
-                    (click)="openDeleteModal(item.id)">
+                    (click)="openDeleteModal(item.id!)">
               Delete
             </button>
           </td>
         </tr>
       </tbody>
     </table>
-  
-    <div class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" 
-         *ngIf="showEditModal">
-      <div class="modal-content bg-white p-6 rounded-md w-full max-w-md">
-        <div class="modal-header flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">{{ selectedItem?.id ? 'Edit Employee' : 'Add New Employee' }}</h3>
-          <button class="text-gray-600 text-xl hover:text-gray-800" (click)="closeEditModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <form *ngIf="selectedItem" class="space-y-4">
-            <div class="form-group">
-              <label class="block font-medium">Name</label>
-              <input type="text" [(ngModel)]="selectedItem.name" name="name" required 
-                     class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" title="Enter Name">
-            </div>
-            <div class="form-group">
-              <label class="block font-medium">Email</label>
-              <input type="email" [(ngModel)]="selectedItem.email" name="email" required 
-                     class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" title="Enter Email">
-            </div>
-            <div class="form-group">
-              <label class="block font-medium">Department</label>
-              <select [(ngModel)]="selectedItem.department" name="department" 
-                      title="Select Department"
-                      class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="IT">IT</option>
-                <option value="HR">HR</option>
-                <option value="Finance">Finance</option>
-                <option value="Marketing">Marketing</option>
-                <option value="Operations">Operations</option>
-              </select>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer flex justify-end gap-2 mt-4">
-          <button class="cancel-btn bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" 
-                  (click)="closeEditModal()">
-            Cancel
-          </button>
-          <button class="save-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300" 
-                  (click)="saveChanges()"
-                  [disabled]="!selectedItem?.name || !selectedItem?.email">
-            {{ selectedItem?.id ? 'Save Changes' : 'Add Employee' }}
-          </button>
-        </div>
+  </div>
+
+  <div class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" 
+       *ngIf="showEditModal">
+    <div class="modal-content bg-white p-6 rounded-md w-full max-w-md">
+      <div class="modal-header flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">{{ selectedItem?.id ? 'Edit Employee' : 'Add New Employee' }}</h3>
+        <button class="text-gray-600 text-xl hover:text-gray-800" (click)="closeEditModal()">&times;</button>
       </div>
-    </div>
-  
-    <div class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" 
-         *ngIf="showDeleteModal">
-      <div class="modal-content bg-white p-6 rounded-md w-full max-w-md">
-        <div class="modal-header flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Confirm Deletion</h3>
-          <button class="text-gray-600 text-xl hover:text-gray-800" (click)="closeDeleteModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to delete this employee record? This action cannot be undone.</p>
-        </div>
-        <div class="modal-footer flex justify-end gap-2 mt-4">
-          <button class="cancel-btn bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" 
-                  (click)="closeDeleteModal()">
-            Cancel
-          </button>
-          <button class="delete-btn bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" 
-                  (click)="confirmDelete()">
-            Delete
-          </button>
-        </div>
+      <div class="modal-body">
+        <form *ngIf="selectedItem" class="space-y-4">
+          <div class="form-group">
+            <label class="block font-medium">Name*</label>
+            <input type="text" [(ngModel)]="selectedItem.name" name="name" required 
+                   class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" title="zx">
+          </div>
+          <div class="form-group">
+            <label class="block font-medium">Email*</label>
+            <input type="email" [(ngModel)]="selectedItem.email" name="email" required 
+                   class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" title="Enter a valid email address">
+          </div>
+          <div class="form-group">
+            <label class="block font-medium">Department</label>
+            <select [(ngModel)]="selectedItem.department" name="department" 
+                    title="Select Department"
+                    class="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="IT">IT</option>
+              <option value="HR">HR</option>
+              <option value="Finance">Finance</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Operations">Operations</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer flex justify-end gap-2 mt-4">
+        <button class="cancel-btn bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" 
+                (click)="closeEditModal()">
+          Cancel
+        </button>
+        <button class="save-btn bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-blue-300" 
+                (click)="saveChanges()" 
+                [disabled]="!selectedItem?.name || !selectedItem?.email">
+          {{ selectedItem?.id ? 'Save Changes' : 'Add Employee' }}
+        </button>
       </div>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" 
+       *ngIf="showDeleteModal">
+    <div class="modal-content bg-white p-6 rounded-md w-full max-w-md">
+      <div class="modal-header flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Confirm Deletion</h3>
+        <button class="text-gray-600 text-xl hover:text-gray-800" (click)="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this employee record? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer flex justify-end gap-2 mt-4">
+        <button class="cancel-btn bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" 
+                (click)="closeDeleteModal()">
+          Cancel
+        </button>
+        <button class="delete-btn bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" 
+                (click)="confirmDelete()">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

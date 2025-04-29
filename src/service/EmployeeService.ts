@@ -16,8 +16,12 @@ export class EmployeeService{
     saveEmployee(employee:Employee):Observable<Employee> {
         return this.http.post<Employee>(`${this.baseUrl}/save`, employee);
     }
-    updateEmployeer(employee:Employee):Observable<Employee> {
-        return this.http.post<Employee>(`${this.baseUrl}/update`, employee);
-    }
+    updateEmployee(employee: Employee): Observable<Employee> {
+        return this.http.put<Employee>(`${this.baseUrl}/update`, employee);
+      }
+    
+      deleteEmployee(id: number): Observable<boolean> {
+        return this.http.delete<boolean>(`${this.baseUrl}/deleteById?id=${id}`);
+      }
     
 }
